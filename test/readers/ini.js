@@ -1,11 +1,11 @@
-const assert = require('assert')
+const assert = require('node:assert')
+const { beforeEach, describe, it } = require('node:test')
 
-beforeEach(function (done) {
+beforeEach(function () {
   this.ini = require('../../lib/readers/ini')
   this.opts = {
     booleans: ['main.bool_true', 'main.bool_false'],
   }
-  done()
 })
 
 describe('ini', function () {
@@ -57,12 +57,7 @@ describe('ini', function () {
 
     it('sect1, opts, w/defaults', function () {
       const r = this.ini.load('test/config/test.ini', {
-        booleans: [
-          '+sect1.bool_true',
-          '-sect1.bool_false',
-          '+sect1.bool_true_default',
-          'sect1.-bool_false_default',
-        ],
+        booleans: ['+sect1.bool_true', '-sect1.bool_false', '+sect1.bool_true_default', 'sect1.-bool_false_default'],
       })
       assert.strictEqual(r.sect1.bool_true, true)
       assert.strictEqual(r.sect1.bool_false, false)

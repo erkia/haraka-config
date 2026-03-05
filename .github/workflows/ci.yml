@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  push:
   pull_request:
+    types: [opened, synchronize, reopened]
 
 env:
   CI: true
@@ -10,6 +10,11 @@ env:
 jobs:
   lint:
     uses: haraka/.github/.github/workflows/lint.yml@master
+
+  prettier:
+    uses: haraka/.github/.github/workflows/prettier.yml@master
+    with:
+      branch: ${{ github.head_ref }}
 
   coverage:
     uses: haraka/.github/.github/workflows/coverage.yml@master

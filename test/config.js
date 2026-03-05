@@ -1,6 +1,6 @@
 const assert = require('node:assert')
-// const { beforeEach, describe, it } = require('node:test')
-const fs = require('node:fs')
+const { beforeEach, describe, it } = require('node:test')
+const fs = require('node:fs/promises')
 const os = require('node:os')
 const path = require('node:path')
 
@@ -16,13 +16,12 @@ function clearRequireCache() {
   delete require.cache[`${path.resolve(__dirname, '..', 'lib', 'reader')}.js`]
 }
 
-function testSetup(done) {
+function testSetup() {
   process.env.NODE_ENV = 'test'
   process.env.HARAKA = ''
   process.env.WITHOUT_CONFIG_CACHE = '1'
   clearRequireCache()
   this.config = require('../config')
-  done()
 }
 
 describe('config', function () {
@@ -59,117 +58,61 @@ describe('config', function () {
     beforeEach(testSetup)
 
     it('name', function () {
-      assert.deepEqual(this.config.arrange_args(['test.ini']), [
-        'test.ini',
-        'ini',
-        undefined,
-        undefined,
-      ])
+      assert.deepEqual(this.config.arrange_args(['test.ini']), ['test.ini', 'ini', undefined, undefined])
     })
 
     it('name, type', function () {
-      assert.deepEqual(this.config.arrange_args(['test.ini', 'ini']), [
-        'test.ini',
-        'ini',
-        undefined,
-        undefined,
-      ])
+      assert.deepEqual(this.config.arrange_args(['test.ini', 'ini']), ['test.ini', 'ini', undefined, undefined])
     })
 
     it('name, callback', function () {
-      assert.deepEqual(this.config.arrange_args(['test.ini', cb]), [
-        'test.ini',
-        'ini',
-        cb,
-        undefined,
-      ])
+      assert.deepEqual(this.config.arrange_args(['test.ini', cb]), ['test.ini', 'ini', cb, undefined])
     })
 
     it('name, callback, options', function () {
-      assert.deepEqual(this.config.arrange_args(['test.ini', cb, opts]), [
-        'test.ini',
-        'ini',
-        cb,
-        opts,
-      ])
+      assert.deepEqual(this.config.arrange_args(['test.ini', cb, opts]), ['test.ini', 'ini', cb, opts])
     })
 
     it('name, options', function () {
-      assert.deepEqual(this.config.arrange_args(['test.ini', opts]), [
-        'test.ini',
-        'ini',
-        undefined,
-        opts,
-      ])
+      assert.deepEqual(this.config.arrange_args(['test.ini', opts]), ['test.ini', 'ini', undefined, opts])
     })
 
     it('name, type, callback', function () {
-      assert.deepEqual(this.config.arrange_args(['test.ini', 'ini', cb]), [
-        'test.ini',
-        'ini',
-        cb,
-        undefined,
-      ])
+      assert.deepEqual(this.config.arrange_args(['test.ini', 'ini', cb]), ['test.ini', 'ini', cb, undefined])
     })
 
     it('name, type, options', function () {
-      assert.deepEqual(this.config.arrange_args(['test.ini', 'ini', opts]), [
-        'test.ini',
-        'ini',
-        undefined,
-        opts,
-      ])
+      assert.deepEqual(this.config.arrange_args(['test.ini', 'ini', opts]), ['test.ini', 'ini', undefined, opts])
     })
 
     it('name, type, callback, options', function () {
-      assert.deepEqual(
-        this.config.arrange_args(['test.ini', 'ini', cb, opts]),
-        ['test.ini', 'ini', cb, opts],
-      )
+      assert.deepEqual(this.config.arrange_args(['test.ini', 'ini', cb, opts]), ['test.ini', 'ini', cb, opts])
     })
 
     it('name, list type, callback, options', function () {
-      assert.deepEqual(
-        this.config.arrange_args(['test.ini', 'list', cb, opts]),
-        ['test.ini', 'list', cb, opts],
-      )
+      assert.deepEqual(this.config.arrange_args(['test.ini', 'list', cb, opts]), ['test.ini', 'list', cb, opts])
     })
 
     it('name, binary type, callback, options', function () {
-      assert.deepEqual(
-        this.config.arrange_args(['test.ini', 'binary', cb, opts]),
-        ['test.ini', 'binary', cb, opts],
-      )
+      assert.deepEqual(this.config.arrange_args(['test.ini', 'binary', cb, opts]), ['test.ini', 'binary', cb, opts])
     })
 
     it('name, value type, callback, options', function () {
-      assert.deepEqual(
-        this.config.arrange_args(['test.ini', 'value', cb, opts]),
-        ['test.ini', 'value', cb, opts],
-      )
+      assert.deepEqual(this.config.arrange_args(['test.ini', 'value', cb, opts]), ['test.ini', 'value', cb, opts])
     })
 
     it('name, hjson type, callback, options', function () {
-      assert.deepEqual(
-        this.config.arrange_args(['test.ini', 'hjson', cb, opts]),
-        ['test.ini', 'hjson', cb, opts],
-      )
+      assert.deepEqual(this.config.arrange_args(['test.ini', 'hjson', cb, opts]), ['test.ini', 'hjson', cb, opts])
     })
 
     // config.get('name', type, cb, options);
     it('name, json type, callback, options', function () {
-      assert.deepEqual(
-        this.config.arrange_args(['test.ini', 'json', cb, opts]),
-        ['test.ini', 'json', cb, opts],
-      )
+      assert.deepEqual(this.config.arrange_args(['test.ini', 'json', cb, opts]), ['test.ini', 'json', cb, opts])
     })
 
     // config.get('name', type, cb, options);
     it('name, data type, callback, options', function () {
-      assert.deepEqual(
-        this.config.arrange_args(['test.ini', 'data', cb, opts]),
-        ['test.ini', 'data', cb, opts],
-      )
+      assert.deepEqual(this.config.arrange_args(['test.ini', 'data', cb, opts]), ['test.ini', 'data', cb, opts])
     })
   })
 })
@@ -321,22 +264,11 @@ describe('get', function () {
   })
 
   it('test.flat, type=list', function () {
-    _test_get('test.list', 'list', null, null, [
-      'line1',
-      'line2',
-      'line3',
-      'line5',
-    ])
+    _test_get('test.list', 'list', null, null, ['line1', 'line2', 'line3', 'line5'])
   })
 
   it('test.flat, type=data', function () {
-    _test_get('test.data', 'data', null, null, [
-      'line1',
-      'line2',
-      'line3',
-      '',
-      'line5',
-    ])
+    _test_get('test.data', 'data', null, null, ['line1', 'line2', 'line3', '', 'line5'])
   })
 
   it('test.hjson, type=', function () {
@@ -402,10 +334,7 @@ describe('merged', function () {
   })
 
   it('after_merge', function () {
-    const lc = this.config.module_config(
-      path.join('test', 'default'),
-      path.join('test', 'override'),
-    )
+    const lc = this.config.module_config(path.join('test', 'default'), path.join('test', 'override'))
     assert.deepEqual(lc.get('test.ini'), {
       main: {},
       defaults: { one: 'three', two: 'four' },
@@ -413,10 +342,7 @@ describe('merged', function () {
   })
 
   it('flat overridden', function () {
-    const lc = this.config.module_config(
-      path.join('test', 'default'),
-      path.join('test', 'override'),
-    )
+    const lc = this.config.module_config(path.join('test', 'default'), path.join('test', 'override'))
     assert.equal(lc.get('test.flat'), 'flatoverrode')
   })
 })
@@ -453,65 +379,64 @@ describe('getInt', function () {
 const tmpFile = path.resolve('test', 'config', 'dir', '4.ext')
 
 describe('getDir', function () {
-  beforeEach(function (done) {
+  beforeEach(async () => {
     process.env.NODE_ENV = 'test'
     process.env.HARAKA = ''
     process.env.WITHOUT_CONFIG_CACHE = '1'
     clearRequireCache()
     this.config = require('../config')
-    fs.unlink(tmpFile, () => done())
+    await fs.unlink(tmpFile).catch(() => {})
   })
 
-  it('loads all files in dir', function (done) {
-    this.config.getDir('dir', { type: 'binary' }, (err, files) => {
-      if (err) console.error(err)
-      assert.ifError(err)
-      assert.equal(err, null)
-      assert.equal(files.length, 4)
-      assert.equal(files[0].data, `contents1${os.EOL}`)
-      assert.equal(files[2].data, `contents3${os.EOL}`)
-      done()
-    })
+  it('loads all files in dir', async () => {
+    const files = await this.config.getDir('dir', { type: 'binary' })
+    assert.equal(files.length, 4)
+    assert.equal(files[0].data, `contents1${os.EOL}`)
+    assert.equal(files[2].data, `contents3${os.EOL}`)
   })
 
-  it('errs on invalid dir', function (done) {
-    this.config.getDir('dirInvalid', { type: 'binary' }, (err) => {
+  it('errs on invalid dir', async () => {
+    try {
+      await this.config.getDir('dirInvalid', { type: 'binary' })
+      assert.fail('expected error')
+    } catch (err) {
       assert.equal(err.code, 'ENOENT')
-      done()
-    })
+    }
   })
 
-  it('reloads when file in dir is touched', function (done) {
-    this.timeout(3500)
+  it('reloads when file in dir is touched', { timeout: 5000 }, async (t) => {
+    // due to differences in fs.watch, this test is unreliable on macOS with Node < 24
+    const nodeMajorVersion = parseInt(process.versions.node.split('.')[0])
+    if (/darwin/.test(process.platform) && nodeMajorVersion < 24) return
 
-    // due to differences in fs.watch, this test is unreliable on Mac OS X
-    // if (/darwin/.test(process.platform)) return done()
+    await t.test('waits for watch event', async () => {
+      return new Promise((resolve) => {
+        let callCount = 0
 
-    let callCount = 0
-
-    const getDir = () => {
-      const opts2 = { type: 'binary', watchCb: getDir }
-      this.config.getDir('dir', opts2, (err, files) => {
-        // console.log('Loading: test/config/dir');
-        if (err) console.error(err)
-        callCount++
-        if (callCount === 1) {
-          assert.equal(err, null)
-          assert.equal(files.length, 4)
-          assert.equal(files[0].data, `contents1${os.EOL}`)
-          assert.equal(files[2].data, `contents3${os.EOL}`)
-          fs.writeFile(tmpFile, 'contents4\n', (err2) => {
-            assert.equal(err2, null)
-            // console.log('file touched, waiting for callback');
-          })
-        } else if (callCount === 2) {
-          assert.equal(files[3].data, 'contents4\n')
-          fs.unlink(tmpFile, () => {})
-          done()
+        const getDir = async () => {
+          try {
+            const opts2 = { type: 'binary', watchCb: getDir }
+            const files = await this.config.getDir('dir', opts2)
+            callCount++
+            if (callCount === 1) {
+              assert.equal(files.length, 4)
+              assert.equal(files[0].data, `contents1${os.EOL}`)
+              assert.equal(files[2].data, `contents3${os.EOL}`)
+              await fs.writeFile(tmpFile, 'contents4\n')
+            } else if (callCount === 2) {
+              assert.equal(files[3].data, 'contents4\n')
+              await fs.unlink(tmpFile)
+              resolve()
+            } else {
+              console.log('unexpected call count: ', callCount)
+            }
+          } catch (err) {
+            console.error(err)
+          }
         }
+        getDir()
       })
-    }
-    getDir()
+    })
   })
 })
 
@@ -542,9 +467,6 @@ describe('jsonOverrides', function () {
   it('with smtpgreeting override', function () {
     process.env.WITHOUT_CONFIG_CACHE = ''
     this.config.get('main.json')
-    assert.deepEqual(this.config.get('smtpgreeting', 'list'), [
-      'this is line one',
-      'this is line two',
-    ])
+    assert.deepEqual(this.config.get('smtpgreeting', 'list'), ['this is line one', 'this is line two'])
   })
 })
