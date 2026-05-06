@@ -345,6 +345,24 @@ describe('merged', function () {
     const lc = this.config.module_config(path.join('test', 'default'), path.join('test', 'override'))
     assert.equal(lc.get('test.flat'), 'flatoverrode')
   })
+
+  it('null default value overridden with object does not throw', function () {
+    // regression: typeof null === 'object' caused merge_struct to recurse into null,
+    // then `key in null` threw TypeError (GitHub #85)
+    const lc = this.config.module_config(path.join('test', 'default'), path.join('test', 'override'))
+    assert.doesNotThrow(() => lc.get('plugins.yaml'))
+  })
+
+  it('null default value replaced by override object', function () {
+    const lc = this.config.module_config(path.join('test', 'default'), path.join('test', 'override'))
+    assert.deepEqual(lc.get('plugins.yaml'), { plugins: { rspamd: { enabled: true } } })
+  })
+
+  it('null override value preserves default object', function () {
+    // a bare YAML key (null) should not wipe out a default object — deep key-by-key semantics
+    const lc = this.config.module_config(path.join('test', 'default'), path.join('test', 'override'))
+    assert.deepEqual(lc.get('tls.yaml'), { tls: { key: '/etc/ssl/key.pem', cert: '/etc/ssl/cert.pem' } })
+  })
 })
 
 describe('getInt', function () {
